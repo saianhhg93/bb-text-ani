@@ -1,0 +1,48 @@
+/* Tạo stacking context riêng để z-index hoạt động đúng khi có filter */
+.focus-container {
+  position: relative;
+  display: inline-flex;
+  gap: 0.5em;
+  align-items: baseline;
+  flex-wrap: wrap;
+  isolation: isolate; /* <- then khung (z-index 999) sẽ chắc chắn nằm trên */
+}
+
+.focus-word {
+  position: relative;
+  font-weight: 900;
+  transition: filter 0.3s ease, color 0.3s ease;
+  z-index: 1; /* text dưới khung */
+}
+
+.focus-word.active { filter: blur(0); }
+
+.focus-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  box-sizing: content-box;
+  z-index: 999;             /* nằm trên mọi từ đã blur */
+  will-change: transform, width, height;
+
+  /* Fallback: nếu vì lý do gì 4 góc chưa render kịp, vẫn nhìn thấy khung */
+  outline: 2px solid var(--border-color, #22c55e);
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+
+.corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--border-color, #22c55e);
+  filter: drop-shadow(0 0 6px var(--glow-color, rgba(0, 255, 0, 0.6)));
+  border-radius: 3px;
+}
+
+/* đặt góc nằm HƠI BÊN NGOÀI khung, nhưng vẫn trong outline-offset */
+.top-left     { top: -6px; left:  -6px; border-right: none; border-bottom: none; }
+.top-right    { top: -6px; right: -6px; border-left:  none; border-bottom: none; }
+.bottom-left  { bottom: -6px; left:  -6px; border-right: none; border-top:    none; }
+.bottom-right { bottom: -6px; right: -6px; border-left:  none; border-top:    none; }

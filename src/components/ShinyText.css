@@ -1,0 +1,54 @@
+/* ===== Fallback mặc định: lớp phủ quét qua ===== */
+.shiny-text {
+  position: relative;
+  display: inline-block;
+  color: inherit;
+  vertical-align: baseline;
+}
+
+.shiny-text::after {
+  content: "";
+  position: absolute;
+  inset: -0.05em 0;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    rgba(0,0,0,0) 40%,
+    var(--shiny-highlight, rgba(255,255,255,0.95)) 50%,
+    rgba(0,0,0,0) 60%
+  );
+  background-size: 200% 100%;
+  background-position: 100% 0;
+  animation: shiny-sweep var(--shiny-duration, 5s) linear infinite;
+  border-radius: .1em;
+  mix-blend-mode: plus-lighter;
+  z-index: 1;
+}
+
+@keyframes shiny-sweep { to { background-position: -100% 0; } }
+
+/* ===== Bản đẹp nhất: clip gradient vào chữ (nếu trình duyệt hỗ trợ) ===== */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .shiny-text {
+    background-image:
+      linear-gradient(120deg,
+        rgba(255,255,255,0) 40%,
+        var(--shiny-highlight, rgba(255,255,255,0.95)) 50%,
+        rgba(255,255,255,0) 60%
+      ),
+      linear-gradient(currentColor, currentColor);
+    background-size: 200% 100%, 100% 100%;
+    background-position: 100% 0, 0 0;
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+
+    animation: shiny-sweep var(--shiny-duration, 5s) linear infinite;
+  }
+  .shiny-text::after { content: none; }
+}
+
+.shiny-text.disabled { animation: none; }
+.shiny-text.disabled::after { animation: none; }

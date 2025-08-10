@@ -1,0 +1,43 @@
+.circular-text {
+  position: relative;
+  width: var(--diameter, 160px);
+  height: var(--diameter, 160px);
+  display: inline-block;
+}
+
+/* Vòng quay */
+.circular-text__spinner {
+  position: absolute;
+  inset: 0;
+  animation: ct-rotate var(--spin-duration, 20s) linear infinite;
+  transform-origin: 50% 50%;
+}
+
+/* Mỗi ký tự đặt ở tâm rồi xoay/đẩy ra rìa */
+.circular-text__char {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: 0 0;
+  white-space: pre; /* giữ khoảng trắng nếu có */
+  font-weight: inherit;
+}
+
+/* Quay đều 360deg */
+@keyframes ct-rotate {
+  to { transform: rotate(360deg); }
+}
+
+/* Hover behaviors */
+.circular-text[data-hover="pause"]:hover .circular-text__spinner {
+  animation-play-state: paused;
+}
+.circular-text[data-hover="speedUp"]:hover .circular-text__spinner {
+  animation-duration: calc(var(--spin-duration, 20s) / 2);
+}
+.circular-text[data-hover="slowDown"]:hover .circular-text__spinner {
+  animation-duration: calc(var(--spin-duration, 20s) * 2);
+}
+.circular-text[data-hover="goBonkers"]:hover .circular-text__spinner {
+  animation-duration: calc(var(--spin-duration, 20s) / 10);
+}
