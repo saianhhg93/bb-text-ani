@@ -1,0 +1,16 @@
+{
+  "name": "bb-text-ani",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "wp-scripts build",
+    "start": "wp-scripts start"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^27.4.0"
+  },
+  "dependencies": {
+    "framer-motion": "^11.3.12",
+    "gsap": "^3.12.5"
+  }
+}
