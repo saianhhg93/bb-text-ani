@@ -1,14 +1,14 @@
 <?php
 /**
- * Plugin Name: bb-text-ani
- * Description: Hiệu ứng chữ React kèm Gutenberg Block, Elementor & Shortcode.
- * Version: 1.2.2
- * Author: Ha Giang Tech
+ * Plugin Name: BB Text Animation
+ * Description: Hiệu ứng chữ trong Gutenberg Block, Elementor & Shortcode.
+ * Version: 1.0.0
+ * Author: Bảo Béo
  * Text Domain: bb-text-ani
  */
 if ( ! defined('ABSPATH') ) exit;
 
-define('BBTA_VERSION', '1.2.2');
+define('BBTA_VERSION', '1.0.0');
 define('BBTA_PLUGIN_FILE', __FILE__);
 define('BBTA_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BBTA_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -233,11 +233,23 @@ add_filter('pre_do_shortcode_tag', function ($output, $tag, $attr, $m) {
 /* ---------------------------------------------------------
  * 8) Elementor widget
  * --------------------------------------------------------- */
-add_action('plugins_loaded', function () {
-	if (did_action('elementor/loaded')) {
-		require_once BBTA_PLUGIN_DIR . 'includes/class-bbta-elementor-widget.php';
-		add_action('elementor/widgets/register', function ($widgets_manager) {
-			$widgets_manager->register(new \BBTA_Elementor_Widget());
-		});
-	}
+function bbta_register_elementor_widgets() {
+    // Chỉ include file và đăng ký widget khi Elementor đã sẵn sàng.
+    require_once BBTA_PLUGIN_DIR . 'includes/class-bbta-elementor-widget.php';
+    
+    // Đăng ký widget với trình quản lý của Elementor
+    \Elementor\Plugin::instance()->widgets_manager->register( new \BBTA_Elementor_Widget() );
+};
+/* ---------------------------------------------------------
+ * 9) Tải script cho Elementor Editor
+ * --------------------------------------------------------- */
+add_action('elementor/editor/after_enqueue_scripts', function () {
+    wp_enqueue_script(
+        'bbta-editor-script',
+        BBTA_PLUGIN_URL . 'assets/js/editor.js',
+        ['elementor-editor', 'jquery'],
+        BBTA_VERSION,
+        true
+    );
 });
+add_action( 'elementor/widgets/register', 'bbta_register_elementor_widgets' );
