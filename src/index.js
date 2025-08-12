@@ -29,6 +29,7 @@ const EFFECTS = {
 const EFFECTS_LC = Object.fromEntries(
   Object.entries(EFFECTS).map(([k, v]) => [k.toLowerCase(), v])
 );
+
 // Cho phần Gutenberg Edit (không dùng JSX để an toàn)
 export function EffectElement({ type = 'TextType', props = {} }) {
   const Comp = EFFECTS[type] || TextType;
@@ -36,9 +37,7 @@ export function EffectElement({ type = 'TextType', props = {} }) {
 }
 
 /* ------------------------------------------------------------------
- * BOOTSTRAP FRONTEND
- * - Xuất window.BBTA.render(node, payload) và window.BBTA.mountAll()
- * - Tự động mount .bbta-root khi DOM ready & khi Elementor init
+ * BOOTSTRAP LOGIC
  * ------------------------------------------------------------------ */
 
 // lưu root React để cập nhật thay vì remount
@@ -73,11 +72,10 @@ function bbtaRender(node, payload) {
   }
 }
 
-
-
 function bbtaMountAll() {
-  const nodes = document.querySelectorAll('.bbta-root[data-bbta]');
+  const nodes = document.querySelectorAll('.bbta-root[data-bbta]:not([data-bbta-inited])');
   nodes.forEach((el) => {
+    el.setAttribute('data-bbta-inited', 'true');
     const raw = el.getAttribute('data-bbta');
     if (!raw) return;
     try {
@@ -96,22 +94,48 @@ if (typeof window !== 'undefined') {
   window.BBTA.render = bbtaRender;
   window.BBTA.mountAll = bbtaMountAll;
 
-  const boot = () => bbtaMountAll();
+  // Logic khởi chạy chính
+  const boot = () => {
+    // Không chạy mountAll trong Elementor editor, vì sẽ có logic riêng
+    if (window.elementorFrontend?.isEditMode()) {
+        return;
+    }
+    bbtaMountAll();
+  };
+
+  // Chạy khi trang tải xong
   if (document.readyState === 'complete' || document.readyState === 'interactive') {
     setTimeout(boot, 0);
   } else {
     document.addEventListener('DOMContentLoaded', boot);
   }
+  
+  // Tích hợp Elementor
+  if (window.jQuery) {
+    jQuery(window).on('elementor/frontend/init', () => {
+        // Chạy cho frontend
+        elementorFrontend.hooks.addAction('frontend/element_ready/bbta_text_ani.default', ($scope) => {
+            bbtaMountAll();
+        });
 
-  // Elementor frontend / popup
-  if (window.jQuery && window.elementorFrontend) {
-    jQuery(window).on('elementor/frontend/init', boot);
-    jQuery(document).on('elementor/popup/show', boot);
+        // **LOGIC ĐẶC BIỆT CHO EDITOR PREVIEW**
+        if (elementorFrontend.isEditMode()) {
+            const observer = new MutationObserver(() => {
+                // Mỗi khi có thay đổi trong DOM của trình dựng, quét lại
+                bbtaMountAll();
+            });
+            // Theo dõi toàn bộ body của trang preview
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+    });
   }
 }
 
 /* ------------------------------------------------------------------
- * Gutenberg Block (dynamic save) — vẫn giữ như cũ
+ * Gutenberg Block (dynamic save)
  * ------------------------------------------------------------------ */
 registerBlockType('bbta/text-ani', {
   title: 'BB Text Ani',
