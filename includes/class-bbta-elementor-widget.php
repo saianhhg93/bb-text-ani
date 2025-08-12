@@ -73,6 +73,7 @@ class BBTA_Elementor_Widget extends Widget_Base {
 			'rows'        => 4,
 			'placeholder' => __( 'Bạn có thể ghi đè props ở đây. UI bên dưới sẽ tự đồng bộ.', 'bb-text-ani' ),
 			'default'     => '{}',
+			'render_type' => 'ui',
 		] );
 
 		$this->end_controls_section();
@@ -502,7 +503,7 @@ class BBTA_Elementor_Widget extends Widget_Base {
 		] );
 		$this->add_control( 'shortcode_preview', [
 			'type'            => Controls_Manager::RAW_HTML,
-			'raw'             => '<div class="bbta-shortcode-preview" style="font-family:monospace;background:#f6f7f7;border:1px solid #ddd;padding:10px;border-radius:6px;white-space:pre;user-select:all"></div><div style="margin-top:6px;color:#666">'.esc_html__( 'Ô này chỉ hiển thị trong trình dựng để bạn copy nhanh.', 'bb-text-ani' ).'</div>',
+		    'raw'             => '<div class="bbta-shortcode-preview-wrapper"><textarea readonly class="bbta-shortcode-preview" style="width:100%;font-family:monospace;background:#f6f7f7;border:1px solid #ddd;padding:10px;border-radius:6px;white-space:pre;user-select:all;resize:vertical" rows="3"></textarea><div style="margin-top:6px;color:#666">'.esc_html__( 'Ô này chỉ hiển thị trong trình dựng để bạn copy nhanh.', 'bb-text-ani' ).'</div></div>',
 			'content_classes' => 'bbta-shortcode-wrap',
 		] );
 		$this->end_controls_section();
@@ -634,7 +635,10 @@ class BBTA_Elementor_Widget extends Widget_Base {
 		wp_enqueue_script( 'bbta-index' );
 		wp_enqueue_style( 'bbta-style' );
 
-		echo '<div class="bbta-root" data-bbta="' . esc_attr( wp_json_encode( $data ) ) . '"></div>';
+// Tạo nội dung fallback để hiển thị trước khi React chạy
+$fallback_text = is_array($text) ? implode(' ', $text) : (string)$text;
+
+echo '<div class="bbta-root" data-bbta="' . esc_attr( wp_json_encode( $data ) ) . '">' . esc_html( $fallback_text ) . '</div>';
 
 		// -------- Shortcode Preview (chỉ hiển thị trong editor) --------
 		if ( Plugin::$instance->editor->is_edit_mode() ) {
